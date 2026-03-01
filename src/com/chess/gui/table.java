@@ -996,20 +996,25 @@ public class table
         this.gameFrame.getContentPane().add(mainContainer);
     }
 
-    private class Move {
+    private class Move
+    {
         int from, to;
-        Move(int from, int to) {
+        Move(int from, int to)
+        {
             this.from = from;
             this.to = to;
         }
     }
 
-    private java.util.List<Move> getAllLegalMoves(boolean isWhite) {
+    private java.util.List<Move> getAllLegalMoves(boolean isWhite)
+    {
         java.util.List<Move> moves = new java.util.ArrayList<>();
         for (int i = 0; i < 64; i++) {
-            if (!pozitii[i].isEmpty() && pozitii[i].startsWith(isWhite ? "white" : "black")) {
+            if (!pozitii[i].isEmpty() && pozitii[i].startsWith(isWhite ? "white" : "black"))
+            {
                 calculateValidMoves(i);
-                for (int dest : validMoves) {
+                for (int dest : validMoves)
+                {
                     moves.add(new Move(i, dest));
                 }
             }
@@ -1018,7 +1023,8 @@ public class table
         return moves;
     }
 
-    private void makeAIMove() {
+    private void makeAIMove()
+    {
         java.util.List<Move> allMoves = getAllLegalMoves(false);
         if(allMoves.isEmpty()) return;
 
@@ -1083,8 +1089,8 @@ public class table
         worker.execute();
     }
 
-    // isLocal ne spune dacă ai dat TU click sau a venit mutarea de pe Net/PC
-    private void executeMove(int from, int to, boolean isLocal) {
+    private void executeMove(int from, int to, boolean isLocal)
+    {
         String pieceMoved = pozitii[from];
 
         String mutareAnotata = getChessNotation(from, to, pozitii[from]);
@@ -1093,17 +1099,22 @@ public class table
 
         istoricJoc.add(new gameState(pozitii,isWhiteTurn,wKingMoved,bKingMoved,wRookLMoved,wRookRMoved,bRookLMoved,bRookRMoved,enPassantTarget));
 
-        if (pieceMoved.endsWith("K") && Math.abs(to - from) == 2) {
-            if (to == from + 2) {
+        if (pieceMoved.endsWith("K") && Math.abs(to - from) == 2)
+        {
+            if (to == from + 2)
+            {
                 pozitii[to - 1] = pozitii[to + 1];
                 pozitii[to + 1] = "";
-            } else if (to == from - 2) {
+            }
+            else if (to == from - 2)
+            {
                 pozitii[to + 1] = pozitii[to - 2];
                 pozitii[to - 2] = "";
             }
         }
 
-        if (pieceMoved.endsWith("P") && to == enPassantTarget) {
+        if (pieceMoved.endsWith("P") && to == enPassantTarget)
+        {
             int direction = pieceMoved.startsWith("white") ? -1 : 1;
             pozitii[to - direction * 8] = "";
         }
@@ -1115,10 +1126,13 @@ public class table
         if (from == 0) bRookLMoved = true;
         if (from == 7) bRookRMoved = true;
 
-        if (pieceMoved.endsWith("P") && Math.abs((to / 8) - (from / 8)) == 2) {
+        if (pieceMoved.endsWith("P") && Math.abs((to / 8) - (from / 8)) == 2)
+        {
             int direction = pieceMoved.startsWith("white") ? -1 : 1;
             enPassantTarget = from + direction * 8;
-        } else {
+        }
+        else
+        {
             enPassantTarget = -1;
         }
         boolean isCapture = !pozitii[to].isEmpty();
@@ -1129,9 +1143,11 @@ public class table
         if (isCapture) AudioManager.playSound("capture.wav");
         else AudioManager.playSound("move.wav");
 
-        if (pieceMoved.endsWith("P")) {
+        if (pieceMoved.endsWith("P"))
+        {
             int targetRow = to / 8;
-            if (targetRow == 0 || targetRow == 7) {
+            if (targetRow == 0 || targetRow == 7)
+            {
                 String color = pieceMoved.startsWith("white") ? "white/w" : "black/b";
                 String newPiece = isMultiplayer ? "Q" : showCustomPromotionDialog();
                 pozitii[to] = color + newPiece;
@@ -1147,12 +1163,14 @@ public class table
         checkForCheckmate();
         boardPanel.drawBoard();
 
-        // ROUTARE DUPĂ MUTARE: Trimitem pe net, SAU lăsăm PC-ul să joace
-        if (isLocal && isMultiplayer) {
+        if (isLocal && isMultiplayer)
+        {
             networkMoveCount++;
             NetworkManager.sendMove(gameCode, from, to, networkMoveCount);
-        } else if (isLocal && !isMultiplayer && !isWhiteTurn) {
-            makeAIMove(); // Offline, deci e rândul PC-ului
+        }
+        else if (isLocal && !isMultiplayer && !isWhiteTurn)
+        {
+            makeAIMove();
         }
     }
 
@@ -1207,20 +1225,6 @@ public class table
             updateTurnLabel();
             boardPanel.drawBoard();
         }
-    }
-
-    private boolean checkPat()
-    {
-        int n=istoricJoc.size();
-        if(n>=8)
-        {
-            gameState inUrmaCu4=istoricJoc.get(n-4);
-            gameState inUrmaCu8=istoricJoc.get(n-8);
-            boolean ok1=java.util.Arrays.equals(inUrmaCu4.clonaPozitii, this.pozitii);
-            boolean ok2=java.util.Arrays.equals(inUrmaCu8.clonaPozitii, this.pozitii);
-            if(ok1 && ok2) return true;
-        }
-        return false;
     }
 
     public void updateCapturedPieces()
